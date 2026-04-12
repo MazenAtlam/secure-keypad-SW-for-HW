@@ -37,6 +37,7 @@ void Display_7Seg_ShowNumber(uint8_t number, bool blank) {
     
     // Output code to GPIO pins
     uint8_t code = Seg_Encoding[number];
+    (void)code; /* Suppress -Wunused-variable when using pseudo-HAL stubs */
     for (int i = 0; i < 7; i++) {
         HAL_GPIO_WritePin(/*PORT*/1, /*PIN*/i, (code & (1 << i)) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     }

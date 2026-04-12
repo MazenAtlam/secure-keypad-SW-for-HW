@@ -31,9 +31,11 @@ void LED_SetProgress(uint8_t count) {
 }
 
 void LED_SetSuccess(bool state) {
+    (void)state; /* Suppress -Wunused-parameter when using pseudo-HAL stubs */
     HAL_GPIO_WritePin(/*PORT*/2, PIN_SUCCESS, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void LED_SetAlarm(bool state) {
+    (void)state; /* Suppress -Wunused-parameter when using pseudo-HAL stubs */
     HAL_GPIO_WritePin(/*PORT*/2, PIN_ALARM, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
