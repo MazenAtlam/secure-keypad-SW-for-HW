@@ -38,6 +38,26 @@ FSM_State_t MealyFSM_GetCurrentState(void) {
 FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
     FSM_State_t NextState = CurrentState; // Default to remain in current state
 
+    /*
+     * EMERGENCY RESET — Global override, handled BEFORE the state switch.
+     * This mirrors a high-priority EXTI interrupt: it forcefully yanks the
+     * system out of ANY state (LOCKED, UNLOCKED, or ALARM), clears all
+     * history (failed attempts, partial sequence), resets every indicator,
+     * and transitions unconditionally to STATE_LOCKED.
+     */
+    if (event.type == EVENT_EMERGENCY_RESET) {
+        FailedAttempts = 0;
+        InputCount = 0;
+
+        if (hw_outputs.set_alarm)             hw_outputs.set_alarm(false);
+        if (hw_outputs.set_success)           hw_outputs.set_success(false);
+        if (hw_outputs.update_progress)       hw_outputs.update_progress(0);
+        if (hw_outputs.update_failed_attempts) hw_outputs.update_failed_attempts(0, false);
+
+        CurrentState = STATE_LOCKED;
+        return STATE_LOCKED;
+    }
+
     switch (CurrentState) {
         
         case STATE_LOCKED:
@@ -101,17 +121,7 @@ FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
             break;
             
         case STATE_ALARM:
-            if (event.type == EVENT_EMERGENCY_RESET) {
-                // MEALY OUTPUT: System halt cleared back to operating mode
-                FailedAttempts = 0;
-                InputCount = 0;
-                
-                if (hw_outputs.set_alarm) hw_outputs.set_alarm(false);
-                if (hw_outputs.update_progress) hw_outputs.update_progress(0);
-                if (hw_outputs.update_failed_attempts) hw_outputs.update_failed_attempts(FailedAttempts, false);
-                
-                NextState = STATE_LOCKED; // Transition
-            }
+            // Only EVENT_EMERGENCY_RESET exits this state (handled above)
             // All other events explicitly ignored
             break;
             
