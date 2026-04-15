@@ -28,6 +28,7 @@ void MealyFSM_Init(FSM_Callbacks_t *callbacks) {
     if (hw_outputs.update_progress) hw_outputs.update_progress(0);
     if (hw_outputs.set_success) hw_outputs.set_success(false);
     if (hw_outputs.set_alarm) hw_outputs.set_alarm(false);
+    if (hw_outputs.set_locked) hw_outputs.set_locked(true);
     if (hw_outputs.update_failed_attempts) hw_outputs.update_failed_attempts(FailedAttempts, false);
 }
 
@@ -52,10 +53,22 @@ FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
         if (hw_outputs.set_alarm)             hw_outputs.set_alarm(false);
         if (hw_outputs.set_success)           hw_outputs.set_success(false);
         if (hw_outputs.update_progress)       hw_outputs.update_progress(0);
+        if (hw_outputs.set_locked)            hw_outputs.set_locked(true);
         if (hw_outputs.update_failed_attempts) hw_outputs.update_failed_attempts(0, false);
 
         CurrentState = STATE_LOCKED;
         return STATE_LOCKED;
+    }
+
+    /*
+     * DOORBELL EVENT — Global override, handled BEFORE the state switch.
+     * Triggers the buzzer output action regardless of whether the system 
+     * is in STATE_LOCKED, STATE_UNLOCKED, or STATE_ALARM. 
+     */
+    if (event.type == EVENT_DOORBELL) {
+        // MEALY OUTPUT: Doorbell trigger in any state
+        if (hw_outputs.pulse_doorbell) hw_outputs.pulse_doorbell();
+        return CurrentState; // Doorbell does not cause a state transition
     }
 
     switch (CurrentState) {
@@ -83,6 +96,7 @@ FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
                         FailedAttempts = 0;
                         if (hw_outputs.update_progress) hw_outputs.update_progress(0);
                         if (hw_outputs.set_success) hw_outputs.set_success(true);
+                        if (hw_outputs.set_locked) hw_outputs.set_locked(false);
                         if (hw_outputs.update_failed_attempts) hw_outputs.update_failed_attempts(FailedAttempts, false);
                         
                         NextState = STATE_UNLOCKED; // Transition
@@ -95,29 +109,26 @@ FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
                         if (FailedAttempts >= MAX_FAILED_ATTEMPTS) {
                             // MEALY OUTPUT: Max thresholds reached
                             if (hw_outputs.set_alarm) hw_outputs.set_alarm(true);
+                            if (hw_outputs.set_locked) hw_outputs.set_locked(false);
                             NextState = STATE_ALARM; // Transition
                         }
                     }
                     InputCount = 0; // Prepare buffer for next attempts
                 }
             } 
-            else if (event.type == EVENT_DOORBELL) {
-                // MEALY OUTPUT: Doorbell trigger in locked state
-                if (hw_outputs.pulse_doorbell) hw_outputs.pulse_doorbell();
-                // State remains Locked
-            }
             break;
             
         case STATE_UNLOCKED:
             if (event.type == EVENT_LOCK_CMD) {
                 // MEALY OUTPUT: Action to physical locked status
                 if (hw_outputs.set_success) hw_outputs.set_success(false);
+                if (hw_outputs.set_locked) hw_outputs.set_locked(true);
                 if (hw_outputs.update_progress) hw_outputs.update_progress(0);
                 InputCount = 0;
                 
                 NextState = STATE_LOCKED; // Transition
             }
-            // Sequence keys and doorbells are explicitly ignored
+            // Sequence keys are explicitly ignored
             break;
             
         case STATE_ALARM:

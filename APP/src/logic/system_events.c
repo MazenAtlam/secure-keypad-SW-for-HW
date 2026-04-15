@@ -1,11 +1,12 @@
 #include "system_events.h"
 
+#include "stm32f4xx_hal.h"
+
 /* 
- * Pseudo-HAL macros for atomic operations (ISR-safe queue) 
- * In a real application (e.g. ARM Cortex-M), these would map to __disable_irq() and __enable_irq()
+ * Mapped to STM32 CMSIS core functions for atomic operations (ISR-safe queue) 
  */
-#define DISABLE_INTERRUPTS()   ((void)0) 
-#define ENABLE_INTERRUPTS()    ((void)0) 
+#define DISABLE_INTERRUPTS()   __disable_irq()
+#define ENABLE_INTERRUPTS()    __enable_irq()
 
 /* Circular buffer size for the event queue */
 #define EVENT_QUEUE_SIZE 16
