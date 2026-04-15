@@ -15,4 +15,10 @@ void LED_SetSuccess(bool state);
 /* Sets the Alarm LED state */
 void LED_SetAlarm(bool state);
 
+/* Sets the Locked LED state (Blue) */
+void LED_SetLocked(bool state);
+
+/* Hardware pulse for the doorbell buzzer */
+void LED_PulseDoorbell(void);
+
 #endif // LED_STATUS_H

@@ -20,6 +20,7 @@ typedef struct {
     void (*update_progress)(uint8_t count);
     void (*set_success)(bool state);
     void (*set_alarm)(bool state);
+    void (*set_locked)(bool state);
     void (*update_failed_attempts)(uint8_t count, bool blank);
     void (*pulse_doorbell)(void);
 } FSM_Callbacks_t;
