@@ -1,41 +1,64 @@
 #include "led_status.h"
+#include "stm32f4xx_hal.h"
 
-/* Pseudo-HAL Macros */
-#define HAL_GPIO_WritePin(port, pin, state) ((void)0)
-#define GPIO_PIN_SET   1
-#define GPIO_PIN_RESET 0
-
-/* Pin Definitions */
-#define PIN_SUCCESS 0
-#define PIN_ALARM   1
-#define PROG_PIN_START 2
 #define MAX_PROGRESS 4
 
 void LED_Status_Init(void) {
-    /* 
-     * Pseudo-HAL Configuration
-     * Configure GPIO pins for Success, Alarm, and Progress LEDs as Output
-     */
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+
+    /* PA2 (Buzzer) */
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* PB0 (Locked), PB1 (Success), PB2 (Alarm) */
+    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* PD13, PD12, PD11, PD10 (Progress LEDs) */
+    GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 }
 
 void LED_SetProgress(uint8_t count) {
-    // Limits
     if (count > MAX_PROGRESS) {
          count = MAX_PROGRESS;
     }
     
-    // Light up 'count' number of LEDs consecutively
+    // Progress LEDs: PD13 (Seq 1), PD12 (Seq 2), PD11 (Seq 3), PD10 (Seq 4)
+    uint16_t prog_pins[4] = {GPIO_PIN_13, GPIO_PIN_12, GPIO_PIN_11, GPIO_PIN_10};
+    
     for (int i = 0; i < MAX_PROGRESS; i++) {
-        HAL_GPIO_WritePin(/*PORT*/2, PROG_PIN_START + i, (i < count) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOD, prog_pins[i], (i < count) ? GPIO_PIN_SET : GPIO_PIN_RESET);
     }
 }
 
 void LED_SetSuccess(bool state) {
-    (void)state; /* Suppress -Wunused-parameter when using pseudo-HAL stubs */
-    HAL_GPIO_WritePin(/*PORT*/2, PIN_SUCCESS, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 void LED_SetAlarm(bool state) {
-    (void)state; /* Suppress -Wunused-parameter when using pseudo-HAL stubs */
-    HAL_GPIO_WritePin(/*PORT*/2, PIN_ALARM, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+void LED_SetLocked(bool state) {
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+void LED_PulseDoorbell(void) {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
+    HAL_Delay(1000);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
 }
