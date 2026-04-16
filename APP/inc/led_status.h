@@ -21,4 +21,7 @@ void LED_SetLocked(bool state);
 /* Hardware pulse for the doorbell buzzer */
 void LED_PulseDoorbell(void);
 
+/* Non-blocking update function to be called in the super-loop */
+void LED_Doorbell_Update(void);
+
 #endif // LED_STATUS_H

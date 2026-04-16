@@ -57,8 +57,22 @@ void LED_SetLocked(bool state) {
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
+static uint32_t doorbell_start_tick = 0;
+static bool doorbell_active = false;
+
 void LED_PulseDoorbell(void) {
+    /* Trigger the buzzer immediately and record start time */
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-    HAL_Delay(1000);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+    doorbell_start_tick = HAL_GetTick();
+    doorbell_active = true;
+}
+
+void LED_Doorbell_Update(void) {
+    /* Non-blocking check for doorbell timeout */
+    if (doorbell_active) {
+        if ((HAL_GetTick() - doorbell_start_tick) >= 1000) {
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+            doorbell_active = false;
+        }
+    }
 }

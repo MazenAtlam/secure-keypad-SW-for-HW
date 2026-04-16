@@ -1,7 +1,7 @@
 #include "mealy_fsm.h"
 
 #define MAX_PASSWORD_LENGTH 4
-#define MAX_FAILED_ATTEMPTS 3
+#define MAX_FAILED_ATTEMPTS 10
 
 /* Target valid sequence */
 static const char VALID_PASSWORD[MAX_PASSWORD_LENGTH] = {'1', '2', '3', '4'};

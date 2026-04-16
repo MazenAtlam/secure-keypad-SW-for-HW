@@ -103,7 +103,10 @@ int main(void) {
             MealyFSM_ProcessEvent(evt);
         }
 
-        /* 7c. Loop Delay / Debounce buffer */
+        /* 7c. Update non-blocking drivers */
+        LED_Doorbell_Update();
+
+        /* 7d. Loop Delay / Debounce buffer */
         HAL_Delay(50);
     }
 
