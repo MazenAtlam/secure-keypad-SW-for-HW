@@ -12,8 +12,8 @@ static const char Keymap[4][3] = {
 
 /* Rows: PD5, PD6, PD7, PD8 */
 static const uint16_t ROW_PINS[4] = {GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8};
-/* Columns: PD0, PD1, PD2 */
-static const uint16_t COL_PINS[3] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2};
+/* Columns: Flipped Y-Axis software mapping (PD2, PD1, PD0) to match hardware wiring inversions */
+static const uint16_t COL_PINS[3] = {GPIO_PIN_2, GPIO_PIN_1, GPIO_PIN_0};
 
 /* State tracking for edge detection (true = currently held down, false = released) */
 static bool key_states[4][3] = {0};

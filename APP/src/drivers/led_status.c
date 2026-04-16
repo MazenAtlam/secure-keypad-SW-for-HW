@@ -10,8 +10,8 @@ void LED_Status_Init(void) {
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
-    /* PA2 (Buzzer) */
-    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    /* PA4 (Doorbell LED migrated from PA2 Buzzer) */
+    GPIO_InitStruct.Pin = GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -61,8 +61,8 @@ static uint32_t doorbell_counter = 0;
 static bool doorbell_active = false;
 
 void LED_PulseDoorbell(void) {
-    /* Trigger the buzzer immediately and set threshold counter */
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
+    /* Trigger the Doorbell LED (PA4) immediately and set threshold counter */
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
     /* FIX: Massively increased threshold to bridge gap in superloop pacing */
     doorbell_counter = 1000000;
     doorbell_active = true;
@@ -76,7 +76,7 @@ void LED_Doorbell_Update(void) {
         }
         
         if (doorbell_counter == 0) {
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
             doorbell_active = false;
         }
     }
