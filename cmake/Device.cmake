@@ -1,6 +1,6 @@
 set(DEVICE                  STM32F401xE) # Select your device
 set(EXTERNAL_CLOCK          8000000)
-option(USE_HAL "Enable HAL" OFF) # ON|OFF
+option(USE_HAL "Enable HAL" ON) # ON|OFF
 
 set(SERIES_CPU        cortex-m4)
 include(cmake/MappedTarget.cmake)

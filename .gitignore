@@ -78,3 +78,6 @@ compile_commands.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Proteus Simulation
+*.pdsbak
