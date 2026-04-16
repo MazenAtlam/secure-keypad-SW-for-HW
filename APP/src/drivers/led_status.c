@@ -64,7 +64,7 @@ void LED_PulseDoorbell(void) {
     /* Trigger the Doorbell LED (PA4) immediately and set threshold counter */
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
     /* FIX: Massively increased threshold to bridge gap in superloop pacing */
-    doorbell_counter = 1000000;
+    doorbell_counter = 1000;
     doorbell_active = true;
 }
 
