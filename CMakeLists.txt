@@ -1,34 +1,58 @@
-cmake_minimum_required(VERSION 3.10)
-project(SecureKeypad C)
+cmake_minimum_required(VERSION 3.30)
+include(cmake/ArmToolchain.cmake)
 
-set(CMAKE_C_STANDARD 99)
+project(secure-keypad-embedded-team43 C)
 
-# --- Include directory for all headers ---
-include_directories(${CMAKE_SOURCE_DIR}/inc)
+set(CMAKE_C_STANDARD                11)
+set(CMAKE_C_STANDARD_REQUIRED       ON)
+set(CMAKE_C_EXTENSIONS              ON)
+enable_language(ASM)
 
-# --- Source files grouped by layer ---
-set(DRIVER_SOURCES
-    src/drivers/keypad.c
-    src/drivers/buttons_exti.c
-    src/drivers/display_7seg.c
-    src/drivers/led_status.c
+set(PROJECT_PATH                         ${CMAKE_CURRENT_SOURCE_DIR})
+include(cmake/Device.cmake)
+include(cmake/SourceList.cmake)
+include(cmake/IncludeList.cmake)
+
+set(LINKER_SCRIPTS_BASE_DIR              ${PROJECT_PATH}/STM32-base/linker/)
+set(STARTUP_BASE_DIR                     ${PROJECT_PATH}/STM32-base/startup/)
+
+set(EXECUTABLE                           ${CMAKE_PROJECT_NAME})
+
+# Executable files
+add_executable(${EXECUTABLE} ${SOURCE_LIST} ${STARTUP_BASE_DIR}/${SERIES_FOLDER}/${MAPPED_DEVICE}.s)
+# Include
+target_include_directories(${EXECUTABLE} PUBLIC ${INCLUDE_LIST})
+# Project symbols
+target_compile_definitions(${EXECUTABLE} PUBLIC ${COMPILER_DEFINE})
+# Compiler options
+target_compile_options(${EXECUTABLE} PUBLIC
+        ${CPU_PARAMETERS}
+        -Wall
+        -Wpedantic
+        -Wno-unused-parameter
 )
 
-set(LOGIC_SOURCES
-    src/logic/system_events.c
-    src/logic/mealy_fsm.c
+# Linker options
+target_link_options(${EXECUTABLE} PRIVATE
+        ${CPU_PARAMETERS}
+        -L${LINKER_SCRIPTS_BASE_DIR}
+        -T${LINKER_SCRIPTS_BASE_DIR}/${SERIES_FOLDER}/${DEVICE}.ld
+#        -nostartfiles
+        -Xlinker --gc-sections
+        -Wl,-Map=${CMAKE_PROJECT_NAME}.map
+        --specs=nano.specs
+        #-u _printf_float                # STDIO float formatting support
 )
 
-set(APP_SOURCES
-    src/app/main.c
+# Execute post-build to print size
+add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
+        COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${EXECUTABLE}>
+)
+# Convert output to hex and binary
+add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.hex
 )
 
-# --- Build the executable ---
-add_executable(secure_keypad
-    ${DRIVER_SOURCES}
-    ${LOGIC_SOURCES}
-    ${APP_SOURCES}
+add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.bin
 )
-
-# --- Compiler warnings ---
-target_compile_options(secure_keypad PRIVATE -Wall -Wextra -pedantic)

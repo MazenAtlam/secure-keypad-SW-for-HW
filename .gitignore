@@ -59,6 +59,7 @@ dkms.conf
 
 # CLion / CMake
 .idea/
+build/
 cmake-build-*/
 CMakeCache.txt
 CMakeFiles/
