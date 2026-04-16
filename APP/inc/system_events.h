@@ -10,7 +10,8 @@ typedef enum {
     EVENT_KEY_PRESSED,     // Indicates a sequence digit was pressed
     EVENT_DOORBELL,        // Triggered by the doorbell EXTI
     EVENT_EMERGENCY_RESET, // Triggered by the emergency reset EXTI
-    EVENT_LOCK_CMD         // Triggered when a specific lock key (e.g. '*') is pressed
+    EVENT_LOCK_CMD,        // Triggered when a specific lock key (e.g. '*') is pressed
+    EVENT_CLEAR_CMD        // Triggered when clear key (e.g. '#') is pressed
 } SystemEvent_t;
 
 /* Event structure containing the event type and optional auxiliary data */

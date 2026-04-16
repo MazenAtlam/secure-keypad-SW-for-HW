@@ -77,8 +77,13 @@ int main(void) {
         if (key != KEYPAD_NO_KEY_PRESSED) {
             /* Classify the key into an event type */
             if (key == '*') {
+                /* FIX: Push specific lock command */
                 SystemEvents_Push(EVENT_LOCK_CMD, key);
+            } else if (key == '#') {
+                /* FIX: Push specific clear command */
+                SystemEvents_Push(EVENT_CLEAR_CMD, key);
             } else {
+                /* Only standard sequence digits (0-9) pass here */
                 SystemEvents_Push(EVENT_KEY_PRESSED, key);
             }
         }
@@ -91,9 +96,7 @@ int main(void) {
 
         /* 7c. Update non-blocking drivers */
         LED_Doorbell_Update();
-
-        /* 7d. Loop Delay / Debounce buffer (Dumb loop for Proteus) */
-        for (volatile uint32_t i = 0; i < 100000; i++);
+        Display_7Seg_Update();
     }
 
     /* Never reached */

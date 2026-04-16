@@ -47,6 +47,9 @@ char Keypad_GetScannedKey(void) {
         /* Drive current row LOW */
         HAL_GPIO_WritePin(GPIOD, ROW_PINS[r], GPIO_PIN_RESET);
         
+        /* FIX: Capacitive smearing delay to let the voltage physically settle LOW */
+        for (volatile int delay = 0; delay < 200; delay++);
+        
         /* Check all columns */
         for (int c = 0; c < 3; c++) {
             bool is_pressed = (HAL_GPIO_ReadPin(GPIOD, COL_PINS[c]) == GPIO_PIN_RESET);
@@ -55,6 +58,9 @@ char Keypad_GetScannedKey(void) {
                 /* Falling edge detected: Key just pressed */
                 pressed_key = Keymap[r][c];
                 key_states[r][c] = true;
+                /* FIX: Short-circuit. Restore row and return immediately to prevent Shadow Presses */
+                HAL_GPIO_WritePin(GPIOD, ROW_PINS[r], GPIO_PIN_SET);
+                return pressed_key;
             } else if (!is_pressed && key_states[r][c]) {
                 /* Rising edge detected: Key released */
                 key_states[r][c] = false;

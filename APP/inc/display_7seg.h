@@ -8,10 +8,12 @@
 void Display_7Seg_Init(void);
 
 /* 
- * Displays a number on the 7-segment display (0-10).
- * 10 is displayed as the hexadecimal character 'A'.
+ * Caches a number to be multiplexed onto the 7-segment display (0-99).
  * If blank == true, turns off all segments. 
  */
 void Display_7Seg_ShowNumber(uint8_t number, bool blank);
+
+/* Multiplexing engine to be called in the superloop */
+void Display_7Seg_Update(void);
 
 #endif // DISPLAY_7SEG_H

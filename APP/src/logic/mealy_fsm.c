@@ -115,7 +115,11 @@ FSM_State_t MealyFSM_ProcessEvent(Event_t event) {
                     }
                     InputCount = 0; // Prepare buffer for next attempts
                 }
-            } 
+            } else if (event.type == EVENT_CLEAR_CMD) {
+                /* FIX: Handle Clear Command properly without logging an error */
+                InputCount = 0;
+                if (hw_outputs.update_progress) hw_outputs.update_progress(0);
+            }
             break;
             
         case STATE_UNLOCKED:

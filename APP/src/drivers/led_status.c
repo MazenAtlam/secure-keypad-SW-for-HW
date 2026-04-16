@@ -63,7 +63,8 @@ static bool doorbell_active = false;
 void LED_PulseDoorbell(void) {
     /* Trigger the buzzer immediately and set threshold counter */
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-    doorbell_counter = 20;
+    /* FIX: Massively increased threshold to bridge gap in superloop pacing */
+    doorbell_counter = 1000000;
     doorbell_active = true;
 }
 
