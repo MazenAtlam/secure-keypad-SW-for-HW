@@ -40,25 +40,11 @@ static void OnEmergencyResetPressed(void) {
 }
 
 /* ========================================================================== */
-/*  Clock Configuration (Basic)                                               */
-/* ========================================================================== */
-void SystemClock_Config(void) {
-    /* 
-     * Basic config: For STM32F401, mostly HAL_Init() takes care of HSI.
-     * If specific clock trees are needed they would be configured here.
-     */
-}
-
-/* ========================================================================== */
 /*  main()                                                                    */
 /* ========================================================================== */
 
 int main(void) {
-    /* ---- 1. Initialize HAL and Clocks ---- */
-    HAL_Init();
-    SystemClock_Config();
-
-    /* ---- 2. Initialize all hardware peripherals ---- */
+    /* ---- 1. Initialize all hardware peripherals ---- */
     Keypad_Init();
     Buttons_EXTI_Init();
     Display_7Seg_Init();
@@ -106,8 +92,8 @@ int main(void) {
         /* 7c. Update non-blocking drivers */
         LED_Doorbell_Update();
 
-        /* 7d. Loop Delay / Debounce buffer */
-        HAL_Delay(50);
+        /* 7d. Loop Delay / Debounce buffer (Dumb loop for Proteus) */
+        for (volatile uint32_t i = 0; i < 100000; i++);
     }
 
     /* Never reached */
